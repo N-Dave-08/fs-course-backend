@@ -2,6 +2,22 @@
 
 > **This is an enhanced lesson template** demonstrating the level of detail, examples, and best practices that should be included in all lessons.
 
+## Learning Objectives
+
+By the end of this lesson, you will be able to:
+- Explain what JWTs are and what “stateless authentication” means
+- Generate and verify JWTs with safe defaults (expiration, secret handling)
+- Implement Express authentication middleware for Bearer tokens
+- Identify common security pitfalls (token storage, long expirations, weak secrets)
+- Apply an end-to-end auth flow (login → token → protected routes)
+
+## Why JWT Authentication Matters
+
+JWTs are one of the most common auth approaches for APIs because they:
+- scale well (no server-side session storage required for basic auth)
+- work across many clients (web, mobile, services)
+- provide a standard token format with signatures to prevent tampering
+
 ## What is JWT Authentication?
 
 **JSON Web Tokens (JWT)** are a compact, URL-safe way to represent claims between two parties. In web applications, JWTs are commonly used for **stateless authentication** - meaning the server doesn't need to store session information.
@@ -31,12 +47,12 @@
 
 A JWT consists of three parts separated by dots (`.`):
 
-```
+```text
 header.payload.signature
 ```
 
 **Example:**
-```
+```text
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywiZXhwIjoxNjE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 ```
 
@@ -52,14 +68,9 @@ graph LR
     A --> C[Payload]
     A --> D[Signature]
     
-    B --> B1["Algorithm<br/>Token Type"]
-    C --> C1["User Claims<br/>Expiration<br/>Issuer"]
-    D --> D1["HMAC Signature<br/>Verification"]
-    
-    style A fill:#e1f5ff
-    style B fill:#fff4e1
-    style C fill:#e8f5e9
-    style D fill:#fce4ec
+    B --> B1["Algorithm, Token Type"]
+    C --> C1["User Claims, Expiration, Issuer"]
+    D --> D1["HMAC Signature, Verification"]
 ```
 
 ## Prerequisites
@@ -295,7 +306,7 @@ sequenceDiagram
     participant Database
     participant JWT
     
-    Client->>Server: POST /api/auth/login<br/>(email, password)
+    Client->>Server: POST /api/auth/login (email, password)
     Server->>Database: Find user by email
     Database-->>Server: User data (with hashed password)
     Server->>Server: Verify password (bcrypt.compare)
@@ -305,7 +316,7 @@ sequenceDiagram
     Client->>Client: Store token (localStorage/cookie)
     
     Note over Client,Server: Subsequent Requests
-    Client->>Server: GET /api/users/me<br/>Authorization: Bearer <token>
+    Client->>Server: GET /api/users/me (Authorization: Bearer token)
     Server->>JWT: Verify token (jwt.verify)
     JWT-->>Server: Decoded payload (userId, email, role)
     Server->>Database: Fetch user data
@@ -398,22 +409,17 @@ export default router;
 
 ```mermaid
 graph TD
-    A[Incoming Request] --> B{Has Authorization<br/>Header?}
-    B -->|No| C[Return 401<br/>Unauthorized]
+    A[Incoming Request] --> B{"Has Authorization Header?"}
+    B -->|No| C["Return 401 Unauthorized"]
     B -->|Yes| D[Extract Token]
-    D --> E{Token Format<br/>Valid?}
+    D --> E{"Token Format Valid?"}
     E -->|No| C
-    E -->|Yes| F[Verify Token<br/>jwt.verify]
-    F --> G{Token Valid<br/>& Not Expired?}
-    G -->|No| H[Return 401<br/>Invalid Token]
-    G -->|Yes| I[Attach User to<br/>req.user]
+    E -->|Yes| F["Verify Token (jwt.verify)"]
+    F --> G{"Token Valid & Not Expired?"}
+    G -->|No| H["Return 401 Invalid Token"]
+    G -->|Yes| I["Attach User to req.user"]
     I --> J[Call next]
     J --> K[Route Handler]
-    
-    style C fill:#ffebee
-    style H fill:#ffebee
-    style I fill:#e8f5e9
-    style K fill:#e1f5ff
 ```
 
 Protect routes by applying the authentication middleware:
@@ -476,13 +482,9 @@ graph TD
     B --> C{Token Valid?}
     C -->|No| D[401 Unauthorized]
     C -->|Yes| E[Authorize Middleware]
-    E --> F{User Role in<br/>Allowed Roles?}
+    E --> F{"User Role in Allowed Roles?"}
     F -->|No| G[403 Forbidden]
     F -->|Yes| H[Route Handler]
-    
-    style D fill:#ffebee
-    style G fill:#fff3e0
-    style H fill:#e8f5e9
 ```
 
 Extend the middleware to check user roles:
@@ -540,13 +542,9 @@ graph TD
     A --> C[localStorage]
     A --> D[Regular Cookies]
     
-    B --> B1["✅ Most Secure<br/>❌ XSS Protected<br/>⚠️ CSRF Risk"]
-    C --> C1["⚠️ XSS Vulnerable<br/>✅ Easy to Use<br/>✅ No CSRF"]
-    D --> D1["❌ XSS Vulnerable<br/>❌ Not Recommended"]
-    
-    style B fill:#e8f5e9
-    style C fill:#fff9c4
-    style D fill:#ffebee
+    B --> B1["✅ Most Secure; ❌ XSS Protected; ⚠️ CSRF Risk"]
+    C --> C1["⚠️ XSS Vulnerable; ✅ Easy to Use; ✅ No CSRF"]
+    D --> D1["❌ XSS Vulnerable; ❌ Not Recommended"]
 ```
 
 **Client-Side Storage Options:**
@@ -716,7 +714,7 @@ router.get('/protected', async (req, res) => {
 ### Issue: "JWT_SECRET is not defined"
 
 **Symptoms:**
-```
+```text
 Error: JWT_SECRET is not defined in environment variables
 ```
 
@@ -813,7 +811,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 });
 ```
 
-## Real-World Example: Complete Auth System
+## Real-World Scenario: Complete Auth System
 
 #### Visual: Complete Authentication Architecture
 
@@ -1010,7 +1008,7 @@ curl http://localhost:3001/api/auth/me \
 3. ✅ Protect your API routes
 4. 📖 Learn about [Password Hashing](./lesson-02-password-hashing.md)
 5. 📖 Learn about [Authorization](./lesson-03-authorization.md)
-6. 💻 Complete the [exercises](./exercises-01.md)
+6. 💻 Complete the [exercises](./exercises-04.md)
 
 ## Additional Resources
 

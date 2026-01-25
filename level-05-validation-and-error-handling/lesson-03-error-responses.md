@@ -9,7 +9,7 @@ By the end of this lesson, you will be able to:
 - Avoid leaking sensitive information in production error responses
 - Recognize common pitfalls (200-with-error-body, inconsistent formats, noisy details)
 
-## Why Error Responses Matter
+## Why Error Response Design Matters
 
 When an API fails, clients need to know:
 - did it fail because of them (bad input)?

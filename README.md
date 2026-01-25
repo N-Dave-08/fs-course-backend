@@ -89,7 +89,7 @@ This backend provides REST API endpoints consumed by:
 
 ### Full Stack Flow
 
-```
+```text
 Frontend → Backend API → Database
               ↓
           Redis Cache

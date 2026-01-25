@@ -9,7 +9,7 @@ By the end of this lesson, you will be able to:
 - Handle errors and “not found” cases correctly in an API
 - Recognize common pitfalls (using `findUnique` incorrectly, assuming updates always succeed)
 
-## Why Queries Matter
+## Why Querying Matters
 
 Your API ultimately needs to:
 - read from the database

@@ -17,7 +17,7 @@
 
 ## Code Organization
 
-```
+```text
 src/
 ├── routes/      # Route definitions
 ├── controllers/ # Request handlers

@@ -9,7 +9,7 @@ By the end of this lesson, you will be able to:
 - Avoid common performance and security pitfalls (overfetching, leaking fields)
 - Recognize common relationship issues (missing foreign key, incorrect relation definitions)
 
-## Why Relationships Matter
+## Why Relationship Modeling Matters
 
 Most real systems have relational data:
 - users → posts
