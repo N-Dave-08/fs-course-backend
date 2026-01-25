@@ -23,6 +23,9 @@ By completing these exercises, you will:
 2. Ensure JWT and bcrypt packages installed
 3. Database with User model ready
 
+**Windows note (PowerShell):**
+PowerShell often aliases `curl` to `Invoke-WebRequest`. Use `curl.exe` if your curl commands behave unexpectedly.
+
 ---
 
 ## Exercise 1: User Registration
@@ -86,14 +89,14 @@ router.post('/register', async (req: Request, res: Response) => {
       data: {
         email,
         name,
-        password: hashedPassword, // Store hashed password
+        passwordHash: hashedPassword, // Store hashed password (recommended naming)
       },
       select: {
         id: true,
         email: true,
         name: true,
         createdAt: true,
-        // password is NOT selected - never return it!
+        // passwordHash is NOT selected - never return it!
       },
     });
 
@@ -185,7 +188,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -421,7 +424,7 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
-  password  String
+  passwordHash String
   role      String   @default("user") // Add role field
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -526,23 +529,18 @@ pnpm dev
 
 **Registration:**
 ```bash
-curl -X POST http://localhost:3001/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice","email":"alice@example.com","password":"password123"}'
+curl.exe -X POST http://localhost:3001/api/auth/register -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"alice@example.com\",\"password\":\"password123\"}"
 ```
 
 **Login:**
 ```bash
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"password123"}'
+curl.exe -X POST http://localhost:3001/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"alice@example.com\",\"password\":\"password123\"}"
 ```
 
 **Protected Route:**
 ```bash
 # Get token from login, then:
-curl http://localhost:3001/api/profile/me \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+curl.exe http://localhost:3001/api/profile/me -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ## Verification Checklist

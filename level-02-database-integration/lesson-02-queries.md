@@ -32,7 +32,7 @@ Prisma gives you a consistent API for these operations, and TypeScript helps you
 ```mermaid
 flowchart LR
   route[ExpressRoute] --> prisma[PrismaClient]
-  prisma --> db[(Database)]
+  prisma --> db[Database]
   db --> prisma
   prisma --> route
 ```

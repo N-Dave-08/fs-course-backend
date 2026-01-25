@@ -347,7 +347,7 @@ Routers are “mini apps” that you mount under a base path.
 
 ```mermaid
 flowchart LR
-  app[Express app] --> mount["app.use('/api/users', usersRouter)"]
+  app[Express app] --> mount["mount /api/users usersRouter"]
   mount --> router[usersRouter]
   router --> r1["GET /"]
   router --> r2["GET /:id"]

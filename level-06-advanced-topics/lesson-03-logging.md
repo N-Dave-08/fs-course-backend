@@ -164,6 +164,33 @@ Excessive logs make real issues harder to spot and can increase costs.
 
 ---
 
+## Manual Testing (Logging output)
+
+The goal is to confirm:
+- request logs appear for incoming requests (Morgan)
+- application logs appear for important events/errors (Winston)
+- secrets are not logged
+
+### Trigger a normal request
+
+```bash
+curl.exe -i http://localhost:3001/health
+```
+
+### Trigger an error path (if you have one)
+
+```bash
+curl.exe -i http://localhost:3001/boom
+```
+
+### What to verify
+
+- Logs include method/path/status and timing for requests
+- Errors include stack traces in logs (server-side) but not in client responses
+- You are not logging passwords/tokens/cookies
+
+---
+
 ## Advanced Logging Patterns (Reference)
 
 ### 1) Request ids for correlation

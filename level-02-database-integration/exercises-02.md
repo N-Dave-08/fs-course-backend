@@ -23,6 +23,9 @@ By completing these exercises, you will:
 2. Ensure Prisma is set up in `project/`
 3. Database should be running and connected
 
+**Windows note (PowerShell):**
+PowerShell often aliases `curl` to `Invoke-WebRequest`. Use `curl.exe` if your curl commands behave unexpectedly.
+
 ---
 
 ## Exercise 1: Prisma Setup
@@ -521,34 +524,28 @@ pnpm dev
 **Users:**
 ```bash
 # Create user
-curl -X POST http://localhost:3001/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice","email":"alice@example.com"}'
+curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"alice@example.com\"}"
 
 # Get all users
-curl http://localhost:3001/api/users
+curl.exe http://localhost:3001/api/users
 
 # Get user by ID
-curl http://localhost:3001/api/users/1
+curl.exe http://localhost:3001/api/users/1
 
 # Update user
-curl -X PUT http://localhost:3001/api/users/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice Updated"}'
+curl.exe -X PUT http://localhost:3001/api/users/1 -H "Content-Type: application/json" -d "{\"name\":\"Alice Updated\"}"
 
 # Delete user
-curl -X DELETE http://localhost:3001/api/users/1
+curl.exe -X DELETE http://localhost:3001/api/users/1
 ```
 
 **Posts:**
 ```bash
 # Create post
-curl -X POST http://localhost:3001/api/posts \
-  -H "Content-Type: application/json" \
-  -d '{"title":"My Post","content":"Post content","authorId":1}'
+curl.exe -X POST http://localhost:3001/api/posts -H "Content-Type: application/json" -d "{\"title\":\"My Post\",\"content\":\"Post content\",\"authorId\":1}"
 
 # Get all posts
-curl http://localhost:3001/api/posts
+curl.exe http://localhost:3001/api/posts
 ```
 
 ## Verification Checklist

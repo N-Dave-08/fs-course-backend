@@ -49,6 +49,33 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 Express uses the 4-arg signature to recognize this as error middleware.
 
+## Async route errors (must-have pattern)
+
+If you use async route handlers, make sure rejections reach your error middleware.
+
+```typescript
+import type { NextFunction, Request, Response, RequestHandler } from "express";
+
+export function asyncHandler(
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>
+): RequestHandler {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+}
+```
+
+Usage:
+
+```typescript
+app.get(
+  "/boom",
+  asyncHandler(async () => {
+    throw new Error("Boom");
+  })
+);
+```
+
 ## Handling Validation Errors (Zod)
 
 ```typescript
@@ -178,6 +205,33 @@ Clients should get safe messages; detailed stacks belong in logs.
 **Solutions:**
 1. Confirm you’re throwing/propagating the `ZodError` (or using `parse` which throws).
 2. Confirm error middleware checks `err instanceof ZodError`.
+
+### Issue: You see “UnhandledPromiseRejection” or the process crashes
+
+**Common causes:**
+- an async handler throws/rejects but you didn’t forward it to `next(err)`
+- missing `asyncHandler` wrapper pattern
+
+**Fix:** wrap async handlers (example above) so errors always reach error middleware.
+
+---
+
+## Manual Testing (Error paths)
+
+You can test your error stack by creating endpoints that intentionally fail (in dev only).
+
+```bash
+# Trigger a known 404 (if you throw AppError(404, ...))
+curl.exe -i http://localhost:3001/api/users/999999
+
+# Trigger a 500 (unexpected error)
+curl.exe -i http://localhost:3001/boom
+```
+
+What to verify:
+- errors return correct status codes
+- responses do not leak stacks in production
+- server logs contain enough context to debug
 
 ---
 

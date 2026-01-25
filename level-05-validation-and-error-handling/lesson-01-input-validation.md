@@ -101,6 +101,60 @@ app.post("/users", validateBody(createUserSchema), (req, res) => {
 });
 ```
 
+## Validating `req.query` and `req.params` too (recommended)
+
+Many bugs come from “stringly typed” query/params.
+Zod can validate these as well, especially with coercion.
+
+### Query validation example (pagination)
+
+```typescript
+import { z } from "zod";
+
+const paginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+```
+
+### Generic middleware helpers
+
+```typescript
+import type { NextFunction, Request, Response } from "express";
+import type { z } from "zod";
+
+function validateQuery<TSchema extends z.ZodTypeAny>(schema: TSchema) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) {
+      return res.status(400).json({ error: "Validation failed", details: result.error.issues });
+    }
+    req.query = result.data as any;
+    return next();
+  };
+}
+
+function validateParams<TSchema extends z.ZodTypeAny>(schema: TSchema) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.params);
+    if (!result.success) {
+      return res.status(400).json({ error: "Validation failed", details: result.error.issues });
+    }
+    req.params = result.data as any;
+    return next();
+  };
+}
+```
+
+Now you can do:
+
+```typescript
+app.get("/users", validateQuery(paginationSchema), (req, res) => {
+  const { page, limit } = req.query as any;
+  res.json({ page, limit });
+});
+```
+
 ## Real-World Scenario: Preventing Bad Data in Your Database
 
 Without validation:
@@ -158,6 +212,24 @@ Return helpful `issues`, not huge stack traces.
 1. Confirm `express.json()` middleware is enabled so `req.body` is parsed.
 2. Confirm the client sends `Content-Type: application/json`.
 3. Log `req.body` in development to confirm shape.
+
+---
+
+## Manual Testing (Windows friendly)
+
+PowerShell note: use `curl.exe` (not `curl` alias).
+
+```bash
+# Should succeed
+curl.exe -i -X POST http://localhost:3001/users -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"alice@example.com\"}"
+
+# Should fail (invalid email)
+curl.exe -i -X POST http://localhost:3001/users -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"not-an-email\"}"
+```
+
+What to verify:
+- status is **400** for invalid input
+- body includes stable `error` and structured `details`
 
 ---
 

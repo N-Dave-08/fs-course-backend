@@ -23,6 +23,9 @@ By completing these exercises, you will:
 2. Ensure Express and Prisma are set up
 3. All exercises should be created in `project/src/`
 
+**Windows note (PowerShell):**
+PowerShell often aliases `curl` to `Invoke-WebRequest`. Use `curl.exe` if your curl commands behave unexpectedly.
+
 ---
 
 ## Exercise 1: RESTful Endpoints
@@ -508,13 +511,13 @@ router.get('/', getUsers);
 **Test Pagination:**
 ```bash
 # First page, 10 items
-curl "http://localhost:3001/api/users?page=1&limit=10"
+curl.exe "http://localhost:3001/api/users?page=1&limit=10"
 
 # Second page
-curl "http://localhost:3001/api/users?page=2&limit=10"
+curl.exe "http://localhost:3001/api/users?page=2&limit=10"
 
 # Custom limit
-curl "http://localhost:3001/api/users?page=1&limit=5"
+curl.exe "http://localhost:3001/api/users?page=1&limit=5"
 ```
 
 **Expected Response:**
@@ -569,32 +572,28 @@ pnpm dev
 **Articles API:**
 ```bash
 # Create article
-curl -X POST http://localhost:3001/api/articles \
-  -H "Content-Type: application/json" \
-  -d '{"title":"My Article","content":"Article content","authorId":1}'
+curl.exe -X POST http://localhost:3001/api/articles -H "Content-Type: application/json" -d "{\"title\":\"My Article\",\"content\":\"Article content\",\"authorId\":1}"
 
 # Get all articles
-curl http://localhost:3001/api/articles
+curl.exe http://localhost:3001/api/articles
 
 # Get article by ID
-curl http://localhost:3001/api/articles/1
+curl.exe http://localhost:3001/api/articles/1
 
 # Update article
-curl -X PUT http://localhost:3001/api/articles/1 \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Updated Title"}'
+curl.exe -X PUT http://localhost:3001/api/articles/1 -H "Content-Type: application/json" -d "{\"title\":\"Updated Title\"}"
 
 # Delete article
-curl -X DELETE http://localhost:3001/api/articles/1
+curl.exe -X DELETE http://localhost:3001/api/articles/1
 ```
 
 **Pagination:**
 ```bash
 # First page
-curl "http://localhost:3001/api/users?page=1&limit=10"
+curl.exe "http://localhost:3001/api/users?page=1&limit=10"
 
 # Second page
-curl "http://localhost:3001/api/users?page=2&limit=10"
+curl.exe "http://localhost:3001/api/users?page=2&limit=10"
 ```
 
 ## Verification Checklist

@@ -23,6 +23,9 @@ By completing these exercises, you will:
 2. Install Zod: `pnpm add zod`
 3. All exercises should be created in `project/src/`
 
+**Windows note (PowerShell):**
+PowerShell often aliases `curl` to `Invoke-WebRequest`. Use `curl.exe` if your curl commands behave unexpectedly.
+
 ---
 
 ## Exercise 1: Input Validation
@@ -330,19 +333,13 @@ pnpm dev
 
 ```bash
 # Valid request
-curl -X POST http://localhost:3001/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice","email":"alice@example.com","password":"password123"}'
+curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"alice@example.com\",\"password\":\"password123\"}"
 
 # Invalid email
-curl -X POST http://localhost:3001/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice","email":"invalid-email","password":"password123"}'
+curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"invalid-email\",\"password\":\"password123\"}"
 
 # Short password
-curl -X POST http://localhost:3001/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Alice","email":"alice@example.com","password":"short"}'
+curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/json" -d "{\"name\":\"Alice\",\"email\":\"alice@example.com\",\"password\":\"short\"}"
 ```
 
 ## Verification Checklist

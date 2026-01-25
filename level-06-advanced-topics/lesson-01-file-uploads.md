@@ -157,6 +157,30 @@ Serve via controlled routes or signed URLs.
 
 ---
 
+## Manual Testing (Windows-friendly)
+
+### Create a small test file (PowerShell)
+
+```powershell
+Set-Content -Path upload-test.txt -Value "hello upload"
+```
+
+### Upload it with `curl.exe`
+
+```bash
+curl.exe -i -X POST http://localhost:3001/upload -F "file=@upload-test.txt"
+```
+
+If your route is mounted differently (e.g., `/api/upload`), adjust the URL.
+
+### What to verify
+
+- **Success path**: `req.file` exists and includes `size`, `mimetype`, and server-side filename/id
+- **Validation path**: non-image files (or oversized files) return a clear 4xx error
+- **Security**: you are not trusting user filenames for storage paths
+
+---
+
 ## Advanced Upload Patterns (Reference)
 
 ### 1) Direct-to-object-storage uploads (recommended at scale)

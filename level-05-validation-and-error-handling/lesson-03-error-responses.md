@@ -168,6 +168,28 @@ Pick one error format and apply it everywhere (ideally from error middleware).
 
 ---
 
+## Manual Testing (Error contract)
+
+PowerShell note: use `curl.exe` (not `curl` alias).
+
+```bash
+# 400 example (bad input)
+curl.exe -i -X POST http://localhost:3001/api/users -H "Content-Type: application/json" -d "{\"email\":\"not-an-email\"}"
+
+# 401 example (missing token, if protected)
+curl.exe -i http://localhost:3001/api/users/me
+
+# 404 example (missing resource)
+curl.exe -i http://localhost:3001/api/users/999999
+```
+
+What to verify:
+- the **status code** matches the semantics (400/401/404/etc.)
+- the **JSON shape** is stable across endpoints
+- the error **details** are structured (issues/codes), not giant raw dumps
+
+---
+
 ## Advanced Error Contract Patterns (Reference)
 
 ### 1) Stable machine-readable error codes

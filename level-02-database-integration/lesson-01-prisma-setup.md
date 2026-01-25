@@ -33,7 +33,7 @@ This reduces “stringly-typed SQL” bugs and makes refactors safer.
 ```mermaid
 flowchart LR
   schema[schema.prisma] --> migrate[Migrations]
-  migrate --> db[(Database)]
+  migrate --> db[Database]
   schema --> client[PrismaClientGenerated]
   client --> app[ExpressRoutes]
   app --> db

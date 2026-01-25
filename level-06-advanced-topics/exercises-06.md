@@ -23,6 +23,9 @@ By completing these exercises, you will:
 2. Install packages: `pnpm add multer express-rate-limit winston morgan`
 3. All exercises should be created in `project/src/`
 
+**Windows note (PowerShell):**
+PowerShell often aliases `curl` to `Invoke-WebRequest`. Use `curl.exe` if your curl commands behave unexpectedly.
+
 ---
 
 ## Exercise 1: File Upload
@@ -259,8 +262,7 @@ pnpm add -D @types/multer @types/morgan
 ### Test File Upload
 
 ```bash
-curl -X POST http://localhost:3001/api/upload \
-  -F "image=@/path/to/image.jpg"
+curl.exe -X POST http://localhost:3001/api/upload -F "image=@/path/to/image.jpg"
 ```
 
 ## Verification Checklist

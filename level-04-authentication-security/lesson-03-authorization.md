@@ -169,6 +169,32 @@ Default to denying access unless explicitly allowed.
 
 ---
 
+## Testing Authorization (Manual)
+
+Assuming you have:
+- a normal user token
+- an admin user token
+
+Test cases to prove your authz is correct:
+
+```bash
+# Normal user should NOT be able to delete arbitrary users
+curl.exe -i -X DELETE http://localhost:3001/api/users/2 -H "Authorization: Bearer USER_TOKEN"
+
+# Admin should be able to delete
+curl.exe -i -X DELETE http://localhost:3001/api/users/2 -H "Authorization: Bearer ADMIN_TOKEN"
+
+# Owner should be able to update themselves (if you implement admin-or-owner)
+curl.exe -i -X PATCH http://localhost:3001/api/users/1 -H "Authorization: Bearer USER_TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"New Name\"}"
+```
+
+What to verify:
+- 401 when unauthenticated
+- 403 when authenticated but forbidden
+- 404 is reserved for “resource doesn’t exist” (don’t misuse it to hide auth issues unless intentional)
+
+---
+
 ## Advanced Authorization Patterns (Reference)
 
 ### 1) Roles vs permissions (RBAC vs “scopes”)
@@ -197,6 +223,27 @@ If your system has organizations/workspaces, authorization must include tenant b
 Common pattern:
 - derive `tenantId` from auth context
 - include it in every query: `where: { id, tenantId }`
+
+### 3b) Query-level authorization (recommended)
+
+Instead of fetching a resource, then checking ownership, then updating, you can enforce ownership in the query:
+
+```typescript
+// Conceptual example: update only if record belongs to user
+await prisma.post.updateMany({
+  where: { id: postId, userId: req.user!.userId },
+  data: { title: newTitle },
+});
+```
+
+Benefits:
+- fewer race conditions
+- fewer places to forget a check
+
+### 7) Don’t rely on “security by UI”
+
+Frontend “protected routes” and hidden buttons are not security controls.
+Authorization must be enforced server-side.
 
 ### 4) “Deny by default” and least privilege
 

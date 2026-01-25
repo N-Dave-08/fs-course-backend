@@ -237,6 +237,20 @@ In PowerShell, use `curl.exe` (not `curl` alias):
 curl.exe -i http://localhost:3001/api/users/me -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
+### Test: expired/invalid token behavior
+
+You want to confirm your API returns:
+- **401** for missing/invalid/expired tokens
+- a consistent error shape (so clients can handle it)
+
+```bash
+# Missing token
+curl.exe -i http://localhost:3001/api/users/me
+
+# Malformed token
+curl.exe -i http://localhost:3001/api/users/me -H "Authorization: Bearer not-a-real-token"
+```
+
 ## Next Steps
 
 Now that you can authenticate requests:

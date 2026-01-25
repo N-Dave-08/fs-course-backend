@@ -23,6 +23,9 @@ By completing these exercises, you will:
 2. Ensure your `project/` directory is set up with Express
 3. All exercises should be created in the `project/src/` directory
 
+**Windows note (PowerShell):**
+PowerShell often aliases `curl` to `Invoke-WebRequest`. If your curl commands behave unexpectedly, use `curl.exe` instead.
+
 ---
 
 ## Exercise 1: Basic Server
@@ -61,7 +64,7 @@ app.listen(PORT, () => {
 1. Run the server: `cd project && pnpm dev`
 2. Test the endpoint:
    ```bash
-   curl http://localhost:3001/health
+   curl.exe http://localhost:3001/health
    # Or visit http://localhost:3001/health in your browser
    ```
 3. Expected response: `{"status":"ok"}`
@@ -93,7 +96,7 @@ cd project
 pnpm dev
 
 # In another terminal, test the endpoint
-curl http://localhost:3001/health
+curl.exe http://localhost:3001/health
 # Expected: {"status":"ok"}
 ```
 
@@ -193,24 +196,22 @@ app.listen(PORT, () => {
 **Verification Steps:**
 1. Test GET /users:
    ```bash
-   curl http://localhost:3001/users
+   curl.exe http://localhost:3001/users
    # Expected: [{"id":1,"name":"Alice","email":"alice@example.com"},...]
    ```
 
 2. Test GET /users/:id:
    ```bash
-   curl http://localhost:3001/users/1
+   curl.exe http://localhost:3001/users/1
    # Expected: {"id":1,"name":"Alice","email":"alice@example.com"}
    
-   curl http://localhost:3001/users/999
+   curl.exe http://localhost:3001/users/999
    # Expected: {"error":"User not found"} with 404 status
    ```
 
 3. Test POST /users:
    ```bash
-   curl -X POST http://localhost:3001/users \
-     -H "Content-Type: application/json" \
-     -d '{"name":"Charlie","email":"charlie@example.com"}'
+   curl.exe -X POST http://localhost:3001/users -H "Content-Type: application/json" -d "{\"name\":\"Charlie\",\"email\":\"charlie@example.com\"}"
    # Expected: {"id":3,"name":"Charlie","email":"charlie@example.com"} with 201 status
    ```
 
@@ -336,7 +337,7 @@ app.listen(PORT, () => {
 
 2. Test logging - make a request and check console:
    ```bash
-   curl http://localhost:3001/health
+   curl.exe http://localhost:3001/health
    # Console should show: [2024-01-01T12:00:00.000Z] GET /health
    ```
 
@@ -353,7 +354,7 @@ app.listen(PORT, () => {
      throw new Error('Test error');
    });
    ```
-   Then test: `curl http://localhost:3001/error`
+   Then test: `curl.exe http://localhost:3001/error`
    Expected: `{"error":"Internal server error"}` with 500 status
 
 **Expected Behaviors:**
@@ -468,13 +469,13 @@ app.listen(PORT, () => {
 **Verification Steps:**
 1. Test health endpoint:
    ```bash
-   curl http://localhost:3001/api/health
+   curl.exe http://localhost:3001/api/health
    # Expected: {"status":"ok","timestamp":"2024-01-01T12:00:00.000Z"}
    ```
 
 2. Test users endpoint:
    ```bash
-   curl http://localhost:3001/api/users
+   curl.exe http://localhost:3001/api/users
    # Expected: Array of users
    ```
 
@@ -528,24 +529,22 @@ The server should start on `http://localhost:3001`
 
 **Health Check:**
 ```bash
-curl http://localhost:3001/api/health
+curl.exe http://localhost:3001/api/health
 ```
 
 **Get All Users:**
 ```bash
-curl http://localhost:3001/api/users
+curl.exe http://localhost:3001/api/users
 ```
 
 **Get User by ID:**
 ```bash
-curl http://localhost:3001/api/users/1
+curl.exe http://localhost:3001/api/users/1
 ```
 
 **Create User:**
 ```bash
-curl -X POST http://localhost:3001/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","email":"john@example.com"}'
+curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/json" -d "{\"name\":\"John Doe\",\"email\":\"john@example.com\"}"
 ```
 
 ## Verification Checklist

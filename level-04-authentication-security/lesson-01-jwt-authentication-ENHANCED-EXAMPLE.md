@@ -398,7 +398,7 @@ graph TD
     B -->|Yes| D[Extract Token]
     D --> E{"Token Format Valid?"}
     E -->|No| C
-    E -->|Yes| F["Verify Token (jwt.verify)"]
+    E -->|Yes| F["Verify Token jwt.verify"]
     F --> G{"Token Valid & Not Expired?"}
     G -->|No| H["Return 401 Invalid Token"]
     G -->|Yes| I["Attach User to req.user"]
@@ -818,7 +818,7 @@ graph TB
     end
     
     subgraph Database["Database"]
-        K[(User Table)]
+        K[User Table]
     end
     
     A -->|POST /login| D

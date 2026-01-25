@@ -27,7 +27,7 @@ Hashing (with a strong password hashing algorithm) ensures:
 
 ```mermaid
 flowchart LR
-  password[PlainPassword] --> hash[HashFunction(bcrypt)]
+  password[PlainPassword] --> hash[HashFunction bcrypt]
   hash --> stored[StoreHashInDB]
   login[LoginAttempt] --> compare[ComparePasswordToHash]
   compare --> ok{Match?}
@@ -48,6 +48,20 @@ const hashedPassword = await bcrypt.hash(password, saltRounds);
 
 Higher cost = slower hash = harder to brute force, but also more CPU on your server.
 Choose a cost based on your environment and performance requirements.
+
+### Benchmarking bcrypt cost (recommended)
+
+Instead of picking a number blindly, benchmark on your actual hardware.
+
+Rule of thumb:
+- aim for something that feels “noticeable but acceptable” per login attempt
+- then protect login with rate limiting
+
+Example benchmark script:
+
+```bash
+node -e "const bcrypt=require('bcrypt'); (async () => { for (const r of [8,10,12,14]) { const t=Date.now(); await bcrypt.hash('password', r); console.log(r, Date.now()-t+'ms'); } })();"
+```
 
 ## Verifying Passwords
 
@@ -149,6 +163,29 @@ Enforce minimum length and basic complexity rules (and consider rate limiting).
 
 ---
 
+## Testing Your Implementation (Manual)
+
+These examples assume conventional auth routes (adjust paths to your project):
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+
+PowerShell note: use `curl.exe` (not `curl` alias).
+
+```bash
+# Register
+curl.exe -X POST http://localhost:3001/api/auth/register -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"password123\",\"name\":\"Test\"}"
+
+# Login
+curl.exe -X POST http://localhost:3001/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"password123\"}"
+```
+
+What you should verify:
+- you **never** return `passwordHash` (or `password`) in responses
+- login errors are generic (“Invalid credentials”) to reduce account enumeration
+- login performance is acceptable under realistic load (and protected by rate limiting)
+
+---
+
 ## Advanced Password Security Patterns (Reference)
 
 ### 1) Argon2 (modern alternative)
@@ -202,6 +239,17 @@ Even with strong hashing, rate limiting protects:
 - password reset abuse
 
 You’ll implement rate limiting in Level 06.
+
+### 7) Hash upgrades and rehash-on-login (advanced, real-world)
+
+Over time, you may want to increase bcrypt cost or migrate algorithms.
+
+Common pattern:
+- store hashes in a field like `passwordHash`
+- when a user logs in successfully, detect if the hash is “old” (low cost or old algorithm)
+- rehash the password with the new settings and update the DB
+
+This lets you upgrade security gradually without forcing a mass password reset.
 
 ## Next Steps
 

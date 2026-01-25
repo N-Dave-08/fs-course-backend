@@ -140,6 +140,26 @@ Rate limiting is a security signal; it’s useful for alerting and incident resp
 
 ---
 
+## Manual Testing (Triggering 429)
+
+PowerShell note: use `curl.exe` (not `curl` alias).
+
+### Simple “spam” test
+
+Adjust the URL to a rate-limited endpoint (example: `/api/health` or `/api/auth/login`).
+
+```powershell
+1..120 | ForEach-Object { curl.exe -s -o NUL -w "%{http_code}`n" http://localhost:3001/api/health }
+```
+
+### What to verify
+
+- You eventually receive **429 Too Many Requests**
+- The response message is clear (and ideally includes retry guidance)
+- In production behind a proxy, ensure client IP detection is correct (see `trust proxy`)
+
+---
+
 ## Advanced Rate Limiting Patterns (Reference)
 
 ### 1) Distributed rate limiting (shared store)
