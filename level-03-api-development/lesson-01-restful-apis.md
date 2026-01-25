@@ -1,4 +1,15 @@
-# Lesson 1: RESTful APIs
+# Lesson 1: RESTful APIs (Long-form Enhanced)
+
+> REST is less about strict rules and more about building a stable, predictable HTTP contract. This long-form lesson adds real-world API design trade-offs: versioning, idempotency, filtering, and error semantics.
+
+## Table of Contents
+
+- Resource-oriented thinking and CRUD mapping
+- Route design: nouns, collections, subresources
+- Status code semantics (beyond “200 for everything”)
+- PUT vs PATCH (and idempotency)
+- Advanced API design patterns (versioning, filtering, bulk operations)
+- Troubleshooting checklist
 
 ## Learning Objectives
 
@@ -137,6 +148,76 @@ Avoid returning stack traces or database error details to clients in production.
 **Solutions:**
 1. Use standard status codes.
 2. Use consistent response formatting (next lesson).
+
+---
+
+## Advanced API Design Patterns (Reference)
+
+### 1) Idempotency: why it changes how you design endpoints
+
+An operation is **idempotent** if repeating it has the same effect as doing it once.
+
+- `GET` should be idempotent
+- `PUT` should be idempotent (same full replacement → same result)
+- `DELETE` is often designed to be idempotent (deleting twice still results in “deleted”)
+- `POST` is typically **not** idempotent (two POSTs often create two records)
+
+Practical takeaway:
+> When designing update endpoints, choose `PUT` or `PATCH` intentionally and document expectations.
+
+### 2) Subresources and nested routes (when it’s appropriate)
+
+Examples:
+- `/users/:userId/posts` (posts belonging to a user)
+- `/posts/:postId/comments` (comments belonging to a post)
+
+Use nested routes when:
+- the relationship is strong and important to clients
+- it improves clarity and authorization logic
+
+Avoid deeply nested routes:
+- `/orgs/:orgId/teams/:teamId/users/:userId/...` becomes hard to maintain
+
+### 3) Filtering, sorting, and pagination as part of the contract
+
+Common patterns:
+- filter: `GET /users?role=admin`
+- search: `GET /users?q=alice`
+- sort: `GET /users?sort=createdAt&order=desc`
+- pagination: `GET /users?page=2&limit=20`
+
+Design guidance:
+- validate and clamp `limit`
+- keep query parameter names consistent across resources
+
+### 4) Versioning (preview)
+
+If you ever need to change the API in a breaking way, versioning is the escape hatch:
+- `/api/v1/users`
+- `/api/v2/users`
+
+Versioning cost:
+- you maintain two contracts
+- tests and docs must cover both
+
+### 5) Bulk operations (advanced)
+
+Sometimes you need batch endpoints for efficiency:
+- `POST /users/bulk`
+- `DELETE /users?ids=1,2,3`
+
+Trade-offs:
+- more complex validation and error reporting
+- harder to make the contract intuitive
+
+### 6) Error semantics as “public API”
+
+In mature APIs, errors are a contract too:
+- 400 means client can fix input
+- 401/403 means auth/authz issues
+- 409 means conflict (unique constraint)
+
+Clients build logic around these.
 
 ## Next Steps
 

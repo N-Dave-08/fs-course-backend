@@ -1,4 +1,12 @@
-# Lesson 1: Input Validation
+# Lesson 1: Input Validation (Long-form Enhanced)
+
+## Table of Contents
+
+- Why runtime validation is required (even with TypeScript)
+- Zod fundamentals and schemas
+- Validation middleware patterns
+- Troubleshooting
+- Advanced patterns: coercion, partial updates, env validation, discriminated unions
 
 ## Learning Objectives
 
@@ -150,6 +158,62 @@ Return helpful `issues`, not huge stack traces.
 1. Confirm `express.json()` middleware is enabled so `req.body` is parsed.
 2. Confirm the client sends `Content-Type: application/json`.
 3. Log `req.body` in development to confirm shape.
+
+---
+
+## Advanced Zod Patterns (Reference)
+
+### 1) Coercion (numbers and booleans from strings)
+
+HTTP inputs often arrive as strings. Coercion helps:
+
+```typescript
+import { z } from "zod";
+
+const paginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+```
+
+### 2) Partial updates (`PATCH`) safely
+
+For PATCH endpoints, you often want optional fields:
+
+```typescript
+const updateUserSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    email: z.string().email().optional(),
+  })
+  .refine((obj) => Object.keys(obj).length > 0, "At least one field is required");
+```
+
+### 3) Preprocess/transform/normalize
+
+Normalize at the boundary:
+
+```typescript
+const emailSchema = z
+  .string()
+  .transform((s) => s.trim().toLowerCase())
+  .pipe(z.string().email());
+```
+
+### 4) Discriminated unions (cleanly validate “one of many shapes”)
+
+Useful when one endpoint supports multiple request “modes”:
+
+```typescript
+const schema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("email"), email: z.string().email() }),
+  z.object({ type: z.literal("phone"), phone: z.string().min(8) }),
+]);
+```
+
+### 5) Validate environment variables too
+
+Environment variables are also untrusted input. Many teams validate them at startup with Zod.
 
 ## Next Steps
 

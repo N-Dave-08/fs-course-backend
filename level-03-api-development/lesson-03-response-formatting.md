@@ -1,4 +1,15 @@
-# Lesson 3: Response Formatting
+# Lesson 3: Response Formatting (Long-form Enhanced)
+
+> Response formatting is where you turn a bunch of endpoints into a coherent API. This long-form lesson adds contract patterns used in production: error codes, pagination metadata, and correlation ids.
+
+## Table of Contents
+
+- Why consistency matters (client simplicity)
+- Success and error envelopes (and trade-offs)
+- Pagination responses and metadata
+- Error hygiene (no stack traces, stable messages)
+- Advanced topics: error codes, request ids, and backwards compatibility
+- Troubleshooting checklist
 
 ## Learning Objectives
 
@@ -159,6 +170,83 @@ Use shared helpers so every handler returns consistent results.
 **Solutions:**
 1. Include `total` (and/or `hasNextPage`) in the response metadata.
 2. Keep `page` and `limit` consistent and validated.
+
+---
+
+## Advanced Response Contract Patterns (Reference)
+
+### 1) Stable error codes (not just messages)
+
+Messages are for humans; codes are for clients.
+
+Example approach:
+
+```typescript
+export type ErrorCode =
+  | "VALIDATION_FAILED"
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "INTERNAL";
+
+export interface ApiErrorBody {
+  success: false;
+  error: string;
+  code: ErrorCode;
+  details?: unknown;
+}
+```
+
+Why it helps:
+- frontends can branch on `code` instead of fragile string matching
+
+### 2) Correlation / request ids
+
+If you include `x-request-id` in responses, you can correlate user reports with server logs.
+
+Typical pattern:
+- middleware generates/propagates a request id
+- response includes it as a header
+- errors may also include it in the JSON body in development
+
+### 3) Backwards compatibility (response evolution)
+
+Changing response shapes breaks clients.
+
+Safe evolution strategies:
+- add new fields (non-breaking)
+- avoid renaming/removing fields without versioning
+- keep error shapes stable
+
+### 4) Pagination metadata: pick a clear contract
+
+Offset pagination (page/limit/total) is simple and UI-friendly:
+
+```json
+{
+  "success": true,
+  "data": {
+    "data": [],
+    "page": 1,
+    "limit": 20,
+    "total": 123
+  }
+}
+```
+
+Cursor pagination is often better for large datasets but changes the UI logic. If you adopt cursor pagination:
+- return `nextCursor`
+- don’t promise stable page numbers
+
+### 5) Avoid leaking internals in errors
+
+Even with a consistent envelope:
+- don’t send stack traces to clients in production
+- log details server-side
+
+Practical rule:
+> Error responses should be safe, stable, and actionable for the client—not a debug dump.
 
 ## Next Steps
 

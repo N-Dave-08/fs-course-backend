@@ -1,4 +1,12 @@
-# Lesson 2: Error Middleware
+# Lesson 2: Error Middleware (Long-form Enhanced)
+
+## Table of Contents
+
+- Why centralized error handling matters
+- Error middleware signature and placement
+- Custom errors and predictable control flow
+- Troubleshooting
+- Advanced patterns: async errors, logging strategy, problem details, and safe production output
 
 ## Learning Objectives
 
@@ -170,6 +178,46 @@ Clients should get safe messages; detailed stacks belong in logs.
 **Solutions:**
 1. Confirm you’re throwing/propagating the `ZodError` (or using `parse` which throws).
 2. Confirm error middleware checks `err instanceof ZodError`.
+
+---
+
+## Advanced Error Handling Patterns (Reference)
+
+### 1) Async route errors: standardize propagation
+
+If you use async handlers, ensure errors always reach your error middleware.
+Common approaches:
+- an `asyncHandler(fn)` wrapper that does `.catch(next)`
+- a framework/helper that auto-wires this pattern
+
+### 2) Log once, with context
+
+A good production pattern:
+- log errors centrally (in error middleware)
+- include request context (request id, user id if available, route)
+- do **not** log secrets (passwords, full Authorization headers)
+
+### 3) Differentiate “expected” errors from “unexpected” errors
+
+Use custom errors (`AppError`) for expected conditions:
+- 404 not found
+- 409 conflict
+- 401/403 auth
+
+Unexpected errors:
+- 500 internal error
+- logged with stack trace
+
+### 4) Don’t leak stack traces to clients
+
+In production responses:
+- return a safe message
+- keep stack traces in logs only
+
+### 5) Consider a standard error format (Problem Details)
+
+Many teams adopt RFC 7807 (`application/problem+json`) for structured errors.
+You don’t need to adopt it now, but it’s useful to know it exists.
 
 ## Next Steps
 

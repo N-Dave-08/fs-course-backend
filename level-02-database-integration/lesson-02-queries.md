@@ -1,4 +1,15 @@
-# Lesson 2: Prisma Queries
+# Lesson 2: Prisma Queries (Long-form Enhanced)
+
+> This lesson goes beyond “CRUD calls” and shows how to write Prisma queries that are safe for APIs: selecting fields, handling not-found and conflicts, and thinking about pagination/performance.
+
+## Table of Contents
+
+- CRUD operations (`findMany`, `findUnique`, `create`, `update`, `delete`)
+- Filtering, sorting, pagination (and clamping)
+- Selecting fields (avoid leaking secrets)
+- Translating Prisma errors into API errors (preview)
+- Advanced patterns: cursor pagination, transactions, and avoiding N+1
+- Troubleshooting checklist
 
 ## Learning Objectives
 
@@ -9,7 +20,7 @@ By the end of this lesson, you will be able to:
 - Handle errors and “not found” cases correctly in an API
 - Recognize common pitfalls (using `findUnique` incorrectly, assuming updates always succeed)
 
-## Why Querying Matters
+## Why Queries Matter
 
 Your API ultimately needs to:
 - read from the database
@@ -173,6 +184,99 @@ Use `select` to return only fields you need.
 **Solutions:**
 1. Confirm your filters are correct.
 2. Confirm you’re connected to the expected database (`DATABASE_URL`).
+
+---
+
+## Advanced Query Patterns (Reference)
+
+### 1) Pagination: offset vs cursor
+
+You’ve seen offset pagination:
+- `skip` + `take`
+
+Offset pagination is simple, but has trade-offs:
+- large offsets can get slow
+- if data changes between requests, items can “shift” between pages
+
+Cursor pagination is often better for large datasets:
+
+```typescript
+// Cursor pagination (example idea)
+const pageSize = 20;
+const cursorId = req.query.cursor ? Number(req.query.cursor) : undefined;
+
+const users = await prisma.user.findMany({
+  take: pageSize,
+  ...(cursorId ? { skip: 1, cursor: { id: cursorId } } : {}),
+  orderBy: { id: "asc" },
+  select: { id: true, email: true, name: true, createdAt: true },
+});
+```
+
+**Key idea:** the next page uses the last item’s id as the cursor.
+
+### 2) Translate Prisma errors into stable API responses (preview)
+
+In real APIs, you typically map:
+- unique constraint violation → **409 Conflict**
+- not found on update/delete → **404 Not Found**
+
+Prisma throws typed errors that you can detect (example):
+
+```typescript
+import { Prisma } from "@prisma/client";
+
+try {
+  await prisma.user.create({ data: { email, name } });
+} catch (err) {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    // Example: unique constraint
+    if (err.code === "P2002") {
+      // return 409 in your API layer
+    }
+  }
+  throw err;
+}
+```
+
+You don’t need to implement full error mapping yet, but start thinking:
+> DB errors are not API responses. Translate them.
+
+### 3) Transactions (preview)
+
+Use transactions when multiple DB operations must succeed or fail together.
+
+```typescript
+await prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({ data: { email, name } });
+  // const profile = await tx.profile.create({ data: { userId: user.id, ... } });
+  return user;
+});
+```
+
+### 4) Avoid N+1 queries
+
+A common anti-pattern is querying related data in a loop:
+
+```typescript
+// ❌ N+1 pattern (conceptual)
+const posts = await prisma.post.findMany();
+for (const post of posts) {
+  await prisma.user.findUnique({ where: { id: post.userId } });
+}
+```
+
+Prefer relation queries with `include`/`select` when appropriate (see Relationships lesson).
+
+### 5) Principle: select only what you need
+
+Even if your model has sensitive fields, `select` prevents accidental leaks:
+
+```typescript
+const users = await prisma.user.findMany({
+  select: { id: true, email: true, name: true },
+});
+```
 
 ## Next Steps
 

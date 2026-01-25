@@ -1,4 +1,16 @@
-# Lesson 1: Prisma Setup
+# Lesson 1: Prisma Setup (Long-form Enhanced)
+
+> Prisma is where “toy APIs” become real systems: schema, migrations, and type-safe queries. This lesson is long-form so it can double as a reference chapter when you hit database problems later.
+
+## Table of Contents
+
+- What Prisma is (and what it is not)
+- Schema as source of truth (`schema.prisma`)
+- Prisma Client generation and singleton patterns
+- Migrations: dev vs prod (and what can go wrong)
+- Environment variables (`DATABASE_URL`) and common misconfigurations
+- Advanced topics: seeding, resetting safely, transactions (preview), and error codes
+- Troubleshooting checklist
 
 ## Learning Objectives
 
@@ -174,6 +186,76 @@ Prevent connection storms and hard-to-debug production issues.
 1. Check `DATABASE_URL`.
 2. Inspect migration history (`prisma migrate status`).
 3. In dev, consider resetting the database if appropriate (be careful).
+
+---
+
+## Advanced Topics (Reference)
+
+### 1) `.env` and `DATABASE_URL`: the #1 source of “it works on my machine”
+
+Prisma reads `DATABASE_URL` to know which database to migrate/query.
+
+Typical failure modes:
+- you changed `.env` but didn’t restart the dev server
+- you have multiple `.env` files and the wrong one is loaded
+- you have multiple terminals and they’re using different environment variables
+- you’re pointing at a production DB from dev by accident (dangerous)
+
+Practical habit:
+- treat `DATABASE_URL` as a “power tool”
+- print it in development logs only if it’s safe (never in production logs)
+
+### 2) Seeding (preview)
+
+Seeding is how you create predictable local data for development/testing.
+
+Typical approaches:
+- a `prisma/seed.ts` script that inserts a few users/posts
+- idempotent seeds (safe to run multiple times)
+
+Even if you don’t implement seeding yet, design your schema so you *can* seed it.
+
+### 3) Resetting databases (dev-only, be careful)
+
+In development, you may reset when you break migrations or need clean state.
+In production, resets are catastrophic.
+
+Know the intent difference:
+- “reset dev state” is a valid workflow
+- “reset prod state” is usually data loss
+
+### 4) Connection management (why the singleton pattern matters)
+
+In Node.js, creating Prisma clients repeatedly can:
+- exhaust DB connections
+- cause intermittent timeouts under load
+
+The singleton pattern shown earlier is a baseline defense.
+
+### 5) Prisma error codes (preview for later lessons)
+
+Real systems map database errors into stable API errors.
+
+Examples you’ll encounter:
+- unique constraint violations (e.g. duplicate email) → typically 409
+- foreign key violations → typically 400 or 404 depending on meaning
+
+You don’t need to memorize codes now, but you should know:
+> You should not return raw DB errors to clients. Translate them into stable, safe API responses.
+
+## Expanded troubleshooting quick hits
+
+### Issue: `prisma generate` runs but TypeScript types don’t update
+
+**Fixes:**
+1. Restart TypeScript server / dev process
+2. Ensure you’re importing from `@prisma/client` generated in this workspace
+
+### Issue: “Too many connections”
+
+**Fixes:**
+1. Ensure you’re not creating PrismaClient inside request handlers
+2. Use the singleton pattern and reuse one instance per process
 
 ## Next Steps
 

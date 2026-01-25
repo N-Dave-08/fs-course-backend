@@ -1,4 +1,12 @@
-# Lesson 2: Password Hashing
+# Lesson 2: Password Hashing (Long-form Enhanced)
+
+## Table of Contents
+
+- Why hashing is mandatory (threat model)
+- Hashing and verifying with bcrypt
+- Secure registration/login patterns (don’t leak info)
+- Troubleshooting
+- Advanced patterns: Argon2, peppering, password resets, rate limiting
 
 ## Learning Objectives
 
@@ -138,6 +146,62 @@ Enforce minimum length and basic complexity rules (and consider rate limiting).
 **Solutions:**
 1. Confirm you’re hashing the original password at registration.
 2. Confirm you’re comparing the raw password to the stored hash (not hashing again manually).
+
+---
+
+## Advanced Password Security Patterns (Reference)
+
+### 1) Argon2 (modern alternative)
+
+bcrypt is widely used and acceptable, but many teams prefer **Argon2** (especially Argon2id) for new systems.
+
+Practical takeaway:
+> Use a slow, memory-hard password hashing algorithm and tune cost based on your environment.
+
+### 2) “Pepper” (server-side secret) — advanced
+
+A pepper is an additional secret (not stored in the DB) combined with the password before hashing.
+
+Pros:
+- if the DB leaks, attackers still need the pepper to verify guesses
+
+Cons:
+- operational complexity (pepper rotation, secret management)
+
+### 3) Password policies (balance UX + security)
+
+Common baseline:
+- minimum length (e.g. 12+)
+- block common passwords
+- allow password managers (don’t over-restrict characters)
+
+Avoid “complexity theatre” rules that harm UX without meaningful security gains.
+
+### 4) Account enumeration defenses (login and register)
+
+Attackers try to learn whether an email exists.
+
+Patterns:
+- login: always return “Invalid credentials” (don’t reveal which part failed)
+- register: consider returning a generic message in some flows (depends on product needs)
+
+### 5) Password reset flow (preview)
+
+A safe reset flow usually includes:
+- one-time reset token (random, high entropy)
+- store only a hash of the reset token in DB
+- short expiry (e.g. 15–60 minutes)
+- invalidate token after use
+
+Never email a password. Never store reset tokens in plaintext.
+
+### 6) Rate limit auth endpoints
+
+Even with strong hashing, rate limiting protects:
+- login brute force
+- password reset abuse
+
+You’ll implement rate limiting in Level 06.
 
 ## Next Steps
 

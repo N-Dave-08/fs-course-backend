@@ -1,4 +1,12 @@
-# Lesson 3: Error Responses
+# Lesson 3: Error Responses (Long-form Enhanced)
+
+## Table of Contents
+
+- Designing consistent error shapes
+- Status codes for common failures
+- Safe vs unsafe error details
+- Troubleshooting
+- Advanced patterns: error codes, correlation ids, and RFC 7807
 
 ## Learning Objectives
 
@@ -9,7 +17,7 @@ By the end of this lesson, you will be able to:
 - Avoid leaking sensitive information in production error responses
 - Recognize common pitfalls (200-with-error-body, inconsistent formats, noisy details)
 
-## Why Error Response Design Matters
+## Why Error Responses Matter
 
 When an API fails, clients need to know:
 - did it fail because of them (bad input)?

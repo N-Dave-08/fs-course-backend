@@ -1,4 +1,12 @@
-# Lesson 3: Authorization
+# Lesson 3: Authorization (Long-form Enhanced)
+
+## Table of Contents
+
+- Authorization vs authentication
+- RBAC (roles) and ownership checks
+- Combining checks safely (admin-or-owner)
+- Troubleshooting
+- Advanced patterns: permissions/scopes, policy-based auth, multi-tenancy, audit logging
 
 ## Learning Objectives
 
@@ -158,6 +166,63 @@ Default to denying access unless explicitly allowed.
 **Solutions:**
 1. Ensure you compare the correct IDs (`userId` vs `id`).
 2. Ensure route param parsing is correct (number vs string).
+
+---
+
+## Advanced Authorization Patterns (Reference)
+
+### 1) Roles vs permissions (RBAC vs “scopes”)
+
+Roles are coarse (“admin”, “user”). Permissions/scopes are finer (“users:read”, “users:delete”).
+
+Many real systems evolve from RBAC → permission-based checks because:
+- roles become too broad (“admin does everything”)
+- teams need granular control per action/resource
+
+### 2) Policy-based access control (PBAC)
+
+Instead of sprinkling `if` statements everywhere, you centralize authorization rules:
+- policies map actions → allowed conditions
+- routes call `can(user, "update", resource)` style functions
+
+Benefits:
+- one place to review security rules
+- easier testing of auth logic
+
+### 3) Multi-tenancy (org/workspace boundaries)
+
+If your system has organizations/workspaces, authorization must include tenant boundaries:
+- a user in org A should not access org B data even if ids collide
+
+Common pattern:
+- derive `tenantId` from auth context
+- include it in every query: `where: { id, tenantId }`
+
+### 4) “Deny by default” and least privilege
+
+Good security posture:
+- default to denying access unless explicitly allowed
+- add permissions intentionally
+
+### 5) Audit logging for sensitive actions
+
+For high-value operations (role changes, deletes, exports), log:
+- who did it (user id)
+- what changed
+- when (timestamp)
+- request id
+
+This is invaluable during incident response.
+
+### 6) Don’t trust client-provided ownership signals
+
+Never authorize based on:
+- `userId` fields sent in request bodies
+- UI “admin mode” toggles
+
+Always authorize based on:
+- authenticated identity (`req.user`)
+- server-validated resource ownership/tenant membership
 
 ## Next Steps
 

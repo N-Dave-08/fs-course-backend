@@ -2,22 +2,6 @@
 
 > **This is an enhanced lesson template** demonstrating the level of detail, examples, and best practices that should be included in all lessons.
 
-## Learning Objectives
-
-By the end of this lesson, you will be able to:
-- Explain what JWTs are and what “stateless authentication” means
-- Generate and verify JWTs with safe defaults (expiration, secret handling)
-- Implement Express authentication middleware for Bearer tokens
-- Identify common security pitfalls (token storage, long expirations, weak secrets)
-- Apply an end-to-end auth flow (login → token → protected routes)
-
-## Why JWT Authentication Matters
-
-JWTs are one of the most common auth approaches for APIs because they:
-- scale well (no server-side session storage required for basic auth)
-- work across many clients (web, mobile, services)
-- provide a standard token format with signatures to prevent tampering
-
 ## What is JWT Authentication?
 
 **JSON Web Tokens (JWT)** are a compact, URL-safe way to represent claims between two parties. In web applications, JWTs are commonly used for **stateless authentication** - meaning the server doesn't need to store session information.
@@ -811,7 +795,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 });
 ```
 
-## Real-World Scenario: Complete Auth System
+## Real-World Example: Complete Auth System
 
 #### Visual: Complete Authentication Architecture
 

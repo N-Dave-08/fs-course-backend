@@ -1,4 +1,15 @@
-# Lesson 2: Request Handling
+# Lesson 2: Request Handling (Long-form Enhanced)
+
+> Request handling is where most real-world bugs live: parsing, validation, normalization, and safe defaults. This long-form lesson adds advanced boundary patterns you’ll reuse across your API.
+
+## Table of Contents
+
+- Boundary mindset: treat everything as untrusted
+- Parsing and validating `req.body`, `req.params`, `req.query`
+- TypeScript request typing (and why it’s not enough)
+- Normalization (trim, case, clamping)
+- Advanced patterns: schema validation, coercion helpers, and consistent 400 errors
+- Troubleshooting checklist
 
 ## Learning Objectives
 
@@ -168,6 +179,67 @@ Clients should be able to render errors reliably.
 **Solutions:**
 1. Confirm route path is correct (`/users/:id`).
 2. Confirm router base path mounting (if using `express.Router`).
+
+---
+
+## Advanced Boundary Patterns (Reference)
+
+### 1) Prefer “parse helpers” for reuse
+
+Boundary parsing is repetitive. Centralize it so all endpoints behave consistently.
+
+```typescript
+export function parsePositiveInt(value: unknown, fallback?: number): number | null {
+  const n = typeof value === "string" ? Number(value) : NaN;
+  if (!Number.isInteger(n) || n <= 0) return fallback ?? null;
+  return n;
+}
+```
+
+Usage:
+
+```typescript
+const page = parsePositiveInt(req.query.page, 1) ?? 1;
+const limit = Math.min(100, parsePositiveInt(req.query.limit, 20) ?? 20);
+```
+
+### 2) Normalize before storing or querying
+
+Normalization reduces “same data, different spelling” bugs:
+- `email.trim().toLowerCase()`
+- `name.trim()`
+- clamp pagination (`limit`)
+
+### 3) Runtime validation (preview, but crucial)
+
+TypeScript does not validate runtime input. For real safety:
+- validate with a schema library (Zod is introduced in Level 05)
+- store the validated data back into `req.body` (or a typed property)
+
+### 4) Stable 400 errors for clients
+
+Frontend forms need field-level errors. A stable shape helps:
+
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    { "path": ["email"], "message": "Invalid email" }
+  ]
+}
+```
+
+Even if you don’t implement this fully yet, design toward it.
+
+### 5) Security mindset: “never trust the client”
+
+Common “trusting input” bugs:
+- allowing clients to send `role: "admin"` in create/update bodies
+- trusting `userId` in the body instead of using auth context
+- trusting query params to choose sensitive fields
+
+Rule of thumb:
+> Client input can request changes, but your server decides what is allowed.
 
 ## Next Steps
 

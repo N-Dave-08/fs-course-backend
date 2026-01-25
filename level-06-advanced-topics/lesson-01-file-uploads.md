@@ -9,7 +9,7 @@ By the end of this lesson, you will be able to:
 - Choose storage strategies (disk vs memory vs object storage like S3)
 - Recognize common pitfalls (trusting mimetype, storing user filenames, unbounded uploads)
 
-## Why Upload Handling Matters
+## Why File Uploads Matter
 
 Many real apps need uploads:
 - profile pictures

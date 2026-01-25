@@ -1,4 +1,15 @@
-# Lesson 1: JWT Authentication
+# Lesson 1: JWT Authentication (Long-form Enhanced)
+
+> This is the “course version” of JWT auth. For the full reference-grade walkthrough (more code, more visuals, more edge cases), see: [JWT Authentication (Enhanced Example)](./lesson-01-jwt-authentication-ENHANCED-EXAMPLE.md).
+
+## Table of Contents
+
+- JWT fundamentals and trade-offs
+- Issuing tokens (claims, expiration)
+- Verifying tokens + attaching auth context
+- Common pitfalls and security gotchas
+- Troubleshooting
+- Advanced patterns: refresh tokens, revocation, storage, rotation
 
 ## Learning Objectives
 
@@ -166,6 +177,65 @@ JWT-based auth is only “stateless” if you verify each request.
 **Solutions:**
 1. Ensure middleware runs before protected routes (`app.use(authenticate)` or per-route usage).
 2. Add proper request typing (advanced; can extend Express `Request` type).
+
+---
+
+## Advanced JWT Patterns (Reference)
+
+### 1) Access tokens vs refresh tokens
+
+In production systems, you usually split tokens into:
+- **Access token**: short-lived (e.g., 15m–1h), sent on every request
+- **Refresh token**: long-lived (e.g., 7–30d), used to obtain new access tokens
+
+Why:
+- stolen access tokens expire quickly
+- refresh tokens can be stored and revoked more carefully (e.g., in DB)
+
+### 2) Token revocation (the “stateless” trade-off)
+
+JWTs are stateless **until** you need immediate revocation.
+
+Common approaches:
+- **Short expirations** for access tokens (primary mitigation)
+- **Refresh token rotation** + server-side storage
+- **Blacklist/denylist** (server-side storage; costs memory/ops)
+
+### 3) Storage: cookie vs localStorage (security trade-offs)
+
+- **HTTP-only cookies**: best defense against XSS token theft, but introduce CSRF considerations
+- **localStorage**: easy for SPAs, but vulnerable to XSS token theft
+
+Rule of thumb:
+> If you can safely do cookie auth, prefer HTTP-only cookies + CSRF defenses.
+
+### 4) Issuer/audience and clock skew
+
+For stronger verification, use:
+- `issuer` (`iss`) and `audience` (`aud`)
+- small allowances for clock skew if needed
+
+This prevents tokens minted for “another app” from being accepted by yours.
+
+### 5) Algorithm confusion and safe defaults
+
+In JWT libraries, avoid accepting unexpected algorithms.
+Use a strong secret (or asymmetric keys) and verify with explicit expectations.
+
+### 6) Key rotation (advanced)
+
+In mature systems you rotate signing keys.
+If you ever adopt asymmetric keys (RS256/ES256):
+- publish a JWKS (public keys) for verification
+- keep private keys secure and rotate on schedule
+
+## Manual testing tips (Windows friendly)
+
+In PowerShell, use `curl.exe` (not `curl` alias):
+
+```bash
+curl.exe -i http://localhost:3001/api/users/me -H "Authorization: Bearer YOUR_TOKEN"
+```
 
 ## Next Steps
 
