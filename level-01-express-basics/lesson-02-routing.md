@@ -247,7 +247,7 @@ flowchart LR
   scan --> match{Method + path matches?}
   match -->|No| scan
   match -->|Yes| chain[Run handler chain]
-  chain --> done[Response or next()]
+  chain --> done[Response sent or next]
 ```
 
 ## Status codes: the minimum you should be consistent about

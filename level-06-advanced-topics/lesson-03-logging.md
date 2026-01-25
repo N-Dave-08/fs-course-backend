@@ -1,4 +1,12 @@
-# Lesson 3: Logging
+# Lesson 3: Logging (Long-form Enhanced)
+
+## Table of Contents
+
+- Why logging matters (observability)
+- Structured logging (Winston) and request logging (Morgan)
+- What to log vs what not to log (security/privacy)
+- Troubleshooting
+- Advanced patterns: request ids, redaction, log levels, and production log pipelines
 
 ## Learning Objectives
 
@@ -153,6 +161,50 @@ Excessive logs make real issues harder to spot and can increase costs.
 **Solutions:**
 1. Reduce log level in production.
 2. Filter request logs or exclude health checks from logging.
+
+---
+
+## Advanced Logging Patterns (Reference)
+
+### 1) Request ids for correlation
+
+In production, you almost always want a request id:
+- attach it early in middleware
+- include it in logs
+- return it as `x-request-id` for client support
+
+This lets you trace a single request across many log lines.
+
+### 2) Redaction (never log secrets)
+
+High-risk fields:
+- passwords
+- JWTs / Authorization headers
+- cookies
+- reset tokens
+
+If you log request bodies, implement redaction first (and ideally avoid logging bodies entirely in production).
+
+### 3) Log levels and signal-to-noise
+
+Typical levels:
+- `error`: failures that require attention
+- `warn`: suspicious or degraded behavior
+- `info`: important lifecycle events
+- `debug`: development-level detail (usually off in production)
+
+### 4) Production pipelines (stdout vs files)
+
+In containers, writing JSON logs to **stdout** is common; the platform collects/ships them.
+Writing to files can work but requires correct persistence and rotation.
+
+### 5) Metrics and traces (beyond logs)
+
+At scale, teams complement logs with:
+- metrics (latency, error rate, throughput)
+- traces (distributed tracing across services)
+
+Logs tell you “what happened”, metrics tell you “how often”, traces tell you “where time went”.
 
 ## Next Steps
 

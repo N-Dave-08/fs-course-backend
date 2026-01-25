@@ -1,4 +1,12 @@
-# Lesson 2: Rate Limiting
+# Lesson 2: Rate Limiting (Long-form Enhanced)
+
+## Table of Contents
+
+- What rate limiting mitigates (and what it doesn’t)
+- Global vs endpoint-specific limits
+- Proxy/IP considerations
+- Troubleshooting
+- Advanced patterns: Redis store, per-user limits, sliding windows, and 429 ergonomics
 
 ## Learning Objectives
 
@@ -129,6 +137,50 @@ Rate limiting is a security signal; it’s useful for alerting and incident resp
 **Solutions:**
 1. Lower `max` for login endpoints.
 2. Add account lockouts or incremental backoff (advanced).
+
+---
+
+## Advanced Rate Limiting Patterns (Reference)
+
+### 1) Distributed rate limiting (shared store)
+
+In multi-server deployments, in-memory rate limiting can be inconsistent because each server has its own counters.
+
+Common solution:
+- store counters in a shared system like Redis
+- configure the limiter store accordingly
+
+### 2) Per-user / per-identifier limits
+
+IP-based limits are imperfect (NAT, shared IPs).
+Sometimes you rate limit by:
+- user id (after auth)
+- email (on login)
+- API key
+
+### 3) Window strategies (fixed vs sliding)
+
+Fixed windows are simple but can be “bursty” at the boundary.
+Sliding window / token bucket style algorithms feel smoother but require more sophistication (and often Redis).
+
+### 4) 429 ergonomics (help clients behave well)
+
+Best practices when returning 429:
+- include a clear message
+- include `Retry-After` header if possible
+- log rate limit events (it’s a security signal)
+
+### 5) Trust proxy correctness (production)
+
+If you’re behind a proxy/CDN and don’t configure trust proxy correctly, all traffic can appear to come from one IP and get blocked.
+
+Use:
+
+```typescript
+app.set("trust proxy", 1);
+```
+
+…and validate that the real client IP is used by your limiter.
 
 ## Next Steps
 

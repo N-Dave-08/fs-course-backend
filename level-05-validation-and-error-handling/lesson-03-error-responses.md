@@ -166,6 +166,53 @@ Pick one error format and apply it everywhere (ideally from error middleware).
 1. Remove stack traces from responses.
 2. Log details server-side; return safe messages client-side.
 
+---
+
+## Advanced Error Contract Patterns (Reference)
+
+### 1) Stable machine-readable error codes
+
+Clients should not parse English strings.
+
+Add a `code` field (in addition to `error`):
+- `VALIDATION_FAILED`
+- `UNAUTHORIZED`
+- `FORBIDDEN`
+- `NOT_FOUND`
+- `CONFLICT`
+- `INTERNAL`
+
+This makes frontend behavior reliable and testable.
+
+### 2) Correlation / request ids
+
+Include `x-request-id` header in responses and log it server-side.
+When a user reports an error, the request id lets you find the exact log entry.
+
+### 3) RFC 7807: Problem Details
+
+Some teams use `application/problem+json`:
+- `type`, `title`, `status`, `detail`, `instance`
+
+It’s not required, but it’s a good standard to know for interoperability.
+
+### 4) Localization and UX
+
+If you need localized messages:
+- keep `code` stable
+- localize messages client-side (or use `title`/`detail` patterns carefully)
+
+### 5) Don’t leak internals, even in “details”
+
+Safe details:
+- validation issues
+- a stable internal code
+
+Unsafe details:
+- stack traces
+- raw SQL
+- database connection strings
+
 ## Next Steps
 
 Now that you can format errors consistently:

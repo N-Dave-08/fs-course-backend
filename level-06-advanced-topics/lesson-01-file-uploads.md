@@ -1,4 +1,12 @@
-# Lesson 1: File Uploads
+# Lesson 1: File Uploads (Long-form Enhanced)
+
+## Table of Contents
+
+- Multipart vs JSON requests
+- Multer basics + validation
+- Storage strategies (disk vs memory vs object storage)
+- Troubleshooting
+- Advanced patterns: direct-to-S3, streaming, scanning, and secure serving
 
 ## Learning Objectives
 
@@ -146,6 +154,54 @@ Serve via controlled routes or signed URLs.
 **Solutions:**
 1. Increase `limits.fileSize` carefully, or enforce product rules.
 2. Prefer direct-to-S3 uploads for large files (advanced).
+
+---
+
+## Advanced Upload Patterns (Reference)
+
+### 1) Direct-to-object-storage uploads (recommended at scale)
+
+In production, you often avoid sending large files through your API servers:
+- backend issues a signed URL (or temporary credentials)
+- client uploads directly to S3-compatible storage
+- backend stores metadata + URL
+
+Benefits:
+- app servers stay stateless
+- fewer timeouts and less memory/disk pressure
+
+### 2) Streaming uploads (reduce memory usage)
+
+If you must handle uploads in your server, prefer streaming pipelines rather than buffering large files in memory.
+
+### 3) Validate by “content sniffing”, not just mimetype
+
+`file.mimetype` can be spoofed.
+
+For high-sensitivity uploads:
+- inspect file signatures (“magic bytes”)
+- enforce allowed formats
+- scan with antivirus
+
+### 4) Secure filenames and paths
+
+Never trust user filenames for storage paths.
+Generate your own ids/filenames and store outside the web root.
+
+### 5) Serving uploads safely
+
+Common safe patterns:
+- private bucket + signed download URLs
+- authenticated download route (checks authz before streaming)
+
+Avoid serving raw upload directories directly from the server.
+
+### 6) Rate limit uploads and protect expensive processing
+
+Uploads can be abused:
+- set size limits
+- rate limit upload endpoints
+- offload image processing to background jobs if needed
 
 ## Next Steps
 
