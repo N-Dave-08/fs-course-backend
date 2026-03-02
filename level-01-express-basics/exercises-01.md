@@ -551,15 +551,15 @@ curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/j
 
 After completing all exercises, verify:
 
-- [ ] Server starts without errors
-- [ ] Health endpoint returns `{"status":"ok"}`
-- [ ] GET /api/users returns array of users
-- [ ] GET /api/users/:id returns specific user or 404
-- [ ] POST /api/users creates new user
-- [ ] Request logging works (check console)
-- [ ] CORS headers are present in responses
-- [ ] Error handling works (test with invalid requests)
-- [ ] All routes are organized in separate files
+- [X] Server starts without errors
+- [X] Health endpoint returns `{"status":"ok"}`
+- [X] GET /api/users returns array of users
+- [X] GET /api/users/:id returns specific user or 404
+- [X] POST /api/users creates new user
+- [X] Request logging works (check console)
+- [X] CORS headers are present in responses
+- [X] Error handling works (test with invalid requests)
+- [X] All routes are organized in separate files
 
 ## Troubleshooting
 
