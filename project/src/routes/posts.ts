@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 const router: Router = Router();
 
 // GET /api/posts
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (res: Response) => {
 	try {
 		const posts = await prisma.post.findMany({
 			include: {
@@ -28,9 +28,9 @@ router.get("/", async (req: Request, res: Response) => {
 // GET /api/posts/:id
 router.get("/:id", async (req: Request, res: Response) => {
 	try {
-		const id = parseInt(req.params.id as string);
+		const id = Number(req.params.id as string);
 
-		if (isNaN(id)) {
+		if (Number.isNaN(id)) {
 			return res.status(400).json({ error: "invalid user id" });
 		}
 
@@ -109,9 +109,9 @@ router.post("/", async (req: Request, res: Response) => {
 // PUT /api/posts/:id
 router.put("/:id", async (req: Request, res: Response) => {
 	try {
-		const id = parseInt(req.params.id as string);
+		const id = Number(req.params.id as string);
 
-		if (isNaN(id)) {
+		if (Number.isNaN(id)) {
 			return res.status(400).json({ error: "invalid user id" });
 		}
 
@@ -156,9 +156,9 @@ router.put("/:id", async (req: Request, res: Response) => {
 // DELETE /api/posts/:id
 router.delete("/:id", async (req: Request, res: Response) => {
 	try {
-		const id = parseInt(req.params.id as string);
+		const id = Number(req.params.id as string);
 
-		if (isNaN(id)) {
+		if (Number.isNaN(id)) {
 			return res.status(400).json({ error: "invalid user id" });
 		}
 
