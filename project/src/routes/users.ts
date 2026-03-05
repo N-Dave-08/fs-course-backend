@@ -1,15 +1,40 @@
-import { type Request, type Response, Router } from "express";
+import type { Request, Response } from "express";
+import { Router } from "express";
 import { prisma } from "../lib/prisma";
+import { users } from "../helpers/users";
 
 const router: Router = Router();
 
 // GET /api/users
-router.get("/", async (res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
 	try {
-		const users = await prisma.user.findMany({
-			orderBy: { createdAt: "desc" },
+		const page = Math.max(1, Number(req.query.page) || 1);
+		const limit = Math.min(100, Number(req.query.limit) || 10);
+
+		const offset = (page - 1) * limit;
+
+		const [users, totalItems] = await Promise.all([
+			// users
+			prisma.user.findMany({
+				skip: offset,
+				take: limit,
+				orderBy: { id: "asc" },
+			}),
+			// totalItems
+			prisma.user.count(),
+		]);
+
+		const totalPages = Math.ceil(totalItems / limit);
+
+		res.json({
+			page,
+			limit,
+			totalItems,
+			totalPages,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+			users,
 		});
-		res.json(users);
 	} catch (error) {
 		console.error("error fetching users:", error);
 		res.status(500).json({ error: "failed to fetch users" });
@@ -19,7 +44,7 @@ router.get("/", async (res: Response) => {
 // GET /api/users/:id
 router.get("/:id", async (req: Request, res: Response) => {
 	try {
-		const id = Number(req.params.id as string);
+		const id = Number(req.params.id);
 
 		if (Number.isNaN(id)) {
 			return res.status(400).json({ error: "invalid user id" });
@@ -77,10 +102,25 @@ router.post("/", async (req: Request, res: Response) => {
 	}
 });
 
+// create many users
+router.post("/create-many-users", async (res: Response) => {
+	try {
+		await prisma.user.createMany({
+			data: users,
+			skipDuplicates: true,
+		});
+
+		res.json({ message: "successfully created dummy users" });
+	} catch (error) {
+		console.error("error creating many users:", error);
+		res.status(500).json({ error: "failed to create many users" });
+	}
+});
+
 // PUT /api/users/:id
 router.put("/:id", async (req: Request, res: Response) => {
 	try {
-		const id = Number(req.params.id as string);
+		const id = Number(req.params.id);
 
 		if (Number.isNaN(id)) {
 			return res.status(400).json({ error: "invalid user id" });
@@ -127,7 +167,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 // DELETE /api/users/:id
 router.delete("/:id", async (req: Request, res: Response) => {
 	try {
-		const id = Number(req.params.id as string);
+		const id = Number(req.params.id);
 
 		if (Number.isNaN(id)) {
 			return res.status(400).json({ error: "invalid user id" });
