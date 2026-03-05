@@ -2,43 +2,13 @@ import type { Request, Response } from "express";
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
 import { users } from "../helpers/users";
+import { getUsers } from "../controllers/users";
 
 const router: Router = Router();
 
 // GET /api/users
 router.get("/", async (req: Request, res: Response) => {
-	try {
-		const page = Math.max(1, Number(req.query.page) || 1);
-		const limit = Math.min(100, Number(req.query.limit) || 10);
-
-		const offset = (page - 1) * limit;
-
-		const [users, totalItems] = await Promise.all([
-			// users
-			prisma.user.findMany({
-				skip: offset,
-				take: limit,
-				orderBy: { id: "asc" },
-			}),
-			// totalItems
-			prisma.user.count(),
-		]);
-
-		const totalPages = Math.ceil(totalItems / limit);
-
-		res.json({
-			page,
-			limit,
-			totalItems,
-			totalPages,
-			hasNextPage: page < totalPages,
-			hasPrevPage: page > 1,
-			users,
-		});
-	} catch (error) {
-		console.error("error fetching users:", error);
-		res.status(500).json({ error: "failed to fetch users" });
-	}
+	getUsers(req, res)
 });
 
 // GET /api/users/:id

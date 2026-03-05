@@ -1,5 +1,6 @@
 import { type Request, type Response, Router } from "express";
 import { prisma } from "../lib/prisma";
+import { validate } from "../middleware/validation";
 
 const router: Router = Router();
 
@@ -61,50 +62,59 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // POST /api/posts
-router.post("/", async (req: Request, res: Response) => {
-	try {
-		const { title, content, published, authorId } = req.body;
+router.post(
+	"/",
+	validate([
+		{ field: "title", required: true, type: "string", minLength: 3 },
+		{ field: "content", required: true, type: "string", minLength: 5 },
+		{ field: "published", required: true, type: "boolean" },
+		{ field: "authorId", required: true, type: "number" },
+	]),
+	async (req: Request, res: Response) => {
+		try {
+			const { title, content, published, authorId } = req.body;
 
-		if (!title || !content || !authorId) {
-			return res
-				.status(400)
-				.json({ error: "title, content, and authorId are required" });
-		}
+			if (!title || !content || !authorId) {
+				return res
+					.status(400)
+					.json({ error: "title, content, and authorId are required" });
+			}
 
-		const author = await prisma.user.findUnique({
-			where: {
-				id: authorId,
-			},
-		});
+			const author = await prisma.user.findUnique({
+				where: {
+					id: authorId,
+				},
+			});
 
-		if (!author) {
-			return res.status(404).json({ error: "author not found" });
-		}
+			if (!author) {
+				return res.status(404).json({ error: "author not found" });
+			}
 
-		const newPost = await prisma.post.create({
-			data: {
-				title,
-				content,
-				published: published || false,
-				authorId,
-			},
-			include: {
-				author: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
+			const newPost = await prisma.post.create({
+				data: {
+					title,
+					content,
+					published: published ?? false,
+					authorId,
+				},
+				include: {
+					author: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
 					},
 				},
-			},
-		});
+			});
 
-		res.status(201).json(newPost);
-	} catch (error) {
-		console.error("error creating post: ", error);
-		res.status(500).json({ error: "failed to create post" });
-	}
-});
+			res.status(201).json(newPost);
+		} catch (error) {
+			console.error("error creating post: ", error);
+			res.status(500).json({ error: "failed to create post" });
+		}
+	},
+);
 
 // PUT /api/posts/:id
 router.put("/:id", async (req: Request, res: Response) => {
