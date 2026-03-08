@@ -1,14 +1,40 @@
 import type { Request, Response } from "express";
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
-import { users } from "../helpers/users";
-import { getUsers } from "../controllers/users";
+import { deleteUser, getUsers } from "../controllers/user.controller";
+import { authenticate } from "../middleware/authenticate.middleware";
+import { authorizeOwnerOrAdmin } from "../middleware/authorize-admin-or-owner.middleware";
+import { AuthRequest } from "../types/auth-request";
 
 const router: Router = Router();
 
 // GET /api/users
 router.get("/", async (req: Request, res: Response) => {
-	getUsers(req, res)
+	getUsers(req, res);
+});
+
+// GET /api/users/me
+router.get("/me", authenticate, async (req: Request, res: Response) => {
+	// const userPayload = (req as any).user;
+
+	const user = await prisma.user.findUnique({
+		where: { id: 31 },
+		select: {
+			id: true,
+			name: true,
+			email: true,
+			bio: true,
+			roles: {
+				include: {
+					roles: true,
+				},
+			},
+		},
+	});
+
+	if (!user) return res.status(404).json({ error: "user not found" });
+
+	res.json(user);
 });
 
 // GET /api/users/:id
@@ -29,63 +55,27 @@ router.get("/:id", async (req: Request, res: Response) => {
 		if (!user) {
 			return res.status(404).json({ error: "user not found" });
 		}
+		res.status(200).json(user);
 	} catch (error) {
 		console.error("error fetching user: ", error);
 		res.status(500).json({ error: "failed to fetch user" });
 	}
 });
 
-// POST /api/users
-router.post("/", async (req: Request, res: Response) => {
-	try {
-		const { email, name, age, bio } = req.body;
-
-		if (!email || !name || !age) {
-			return res
-				.status(400)
-				.json({ error: "email, name, and age are required" });
-		}
-
-		const existingUser = await prisma.user.findUnique({
-			where: {
-				email: email,
-			},
-		});
-
-		if (existingUser) {
-			return res.status(409).json({ error: "email already exist" });
-		}
-
-		const newUser = await prisma.user.create({
-			data: {
-				email,
-				name,
-				age: Number(age),
-				bio,
-			},
-		});
-
-		res.status(201).json(newUser);
-	} catch (error) {
-		console.error("error creating user: ", error);
-		res.status(500).json({ error: "failed to create user" });
-	}
-});
-
 // create many users
-router.post("/create-many-users", async (res: Response) => {
-	try {
-		await prisma.user.createMany({
-			data: users,
-			skipDuplicates: true,
-		});
+// router.post("/create-many-users", async (res: Response) => {
+// 	try {
+// 		await prisma.user.createMany({
+// 			data: users,
+// 			skipDuplicates: true,
+// 		});
 
-		res.json({ message: "successfully created dummy users" });
-	} catch (error) {
-		console.error("error creating many users:", error);
-		res.status(500).json({ error: "failed to create many users" });
-	}
-});
+// 		res.json({ message: "successfully created dummy users" });
+// 	} catch (error) {
+// 		console.error("error creating many users:", error);
+// 		res.status(500).json({ error: "failed to create many users" });
+// 	}
+// });
 
 // PUT /api/users/:id
 router.put("/:id", async (req: Request, res: Response) => {
@@ -135,35 +125,11 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 // DELETE /api/users/:id
-router.delete("/:id", async (req: Request, res: Response) => {
-	try {
-		const id = Number(req.params.id);
-
-		if (Number.isNaN(id)) {
-			return res.status(400).json({ error: "invalid user id" });
-		}
-
-		const user = await prisma.user.findUnique({
-			where: {
-				id: id,
-			},
-		});
-
-		if (!user) {
-			return res.status(404).json({ error: "user not found" });
-		}
-
-		await prisma.user.delete({
-			where: {
-				id,
-			},
-		});
-
-		res.status(204).send();
-	} catch (error) {
-		console.error("error fetching user: ", error);
-		res.status(500).json({ error: "failed to delete user" });
-	}
-});
+router.delete(
+	"/:id",
+	authenticate,
+	authorizeOwnerOrAdmin((req: AuthRequest) => Number(req.params.id)),
+	deleteUser
+);
 
 export default router;

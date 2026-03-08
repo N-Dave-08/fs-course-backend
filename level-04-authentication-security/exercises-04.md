@@ -547,14 +547,14 @@ curl.exe http://localhost:3001/api/profile/me -H "Authorization: Bearer YOUR_TOK
 
 After completing all exercises, verify:
 
-- [ ] Registration hashes passwords
-- [ ] Login generates JWT tokens
-- [ ] Authentication middleware works
-- [ ] Protected routes require auth
-- [ ] Authorization middleware works
-- [ ] Role-based access enforced
-- [ ] Errors handled properly
-- [ ] Security best practices followed
+- [X] Registration hashes passwords
+- [X] Login generates JWT tokens
+- [X] Authentication middleware works
+- [X] Protected routes require auth
+- [X] Authorization middleware works
+- [X] Role-based access enforced
+- [X] Errors handled properly
+- [X] Security best practices followed
 
 ## Troubleshooting
 
