@@ -1,5 +1,6 @@
 import { AuthRequest } from "../types/auth-request";
 import { NextFunction, Response } from "express";
+import { sendForbiddenError } from "../utils/error";
 
 export function authorizeOwnerOrAdmin(
 	getOwnerId: (req: AuthRequest) => number,
@@ -16,7 +17,7 @@ export function authorizeOwnerOrAdmin(
 		const isAdmin = user.roles.includes("admin");
 
 		if (!isAdmin && user.id !== ownerId) {
-			return res.status(403).json({ error: "forbidden" });
+			return sendForbiddenError(res);
 		}
 
 		next();

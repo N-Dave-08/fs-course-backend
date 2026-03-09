@@ -346,13 +346,13 @@ curl.exe -X POST http://localhost:3001/api/users -H "Content-Type: application/j
 
 After completing all exercises, verify:
 
-- [ ] Zod validation works
-- [ ] Error middleware catches errors
-- [ ] Custom error classes work
-- [ ] Error responses are consistent
-- [ ] Validation errors are clear
-- [ ] Status codes are correct
-- [ ] All errors are handled
+- [X] Zod validation works
+- [X] Error middleware catches errors
+- [X] Custom error classes work
+- [X] Error responses are consistent
+- [X] Validation errors are clear
+- [X] Status codes are correct
+- [X] All errors are handled
 
 ## Troubleshooting
 
