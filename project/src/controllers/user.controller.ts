@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { logger } from "../config/logger";
 
 // GET /users
 export async function getUsers(req: Request, res: Response) {
@@ -88,8 +89,11 @@ export async function getUsers(req: Request, res: Response) {
 // DELETE /users/:id
 export async function deleteUser(req: Request, res: Response) {
 	try {
-		// req.params.id is already validated and typed by validateParams(idSchema)
-		const { id } = req.params as unknown as { id: number };
+		const id = Number(req.params.id); // convert string to number
+
+		if (Number.isNaN(id)) {
+			return res.status(400).json({ success: false, error: "Invalid user ID" });
+		}
 
 		const deleted = await prisma.user.delete({ where: { id } });
 
@@ -97,7 +101,9 @@ export async function deleteUser(req: Request, res: Response) {
 			.status(200)
 			.json({ success: true, message: "User deleted", user: deleted });
 	} catch (error) {
-		console.error("Error deleting user:", error);
+		logger.error(
+			`Error deleting user: ${error instanceof Error ? error.stack : JSON.stringify(error)}`,
+		);
 		res.status(404).json({ success: false, error: "User not found" });
 	}
 }

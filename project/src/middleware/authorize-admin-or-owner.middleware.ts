@@ -14,7 +14,7 @@ export function authorizeOwnerOrAdmin(
 
 		const ownerId = getOwnerId(req);
 
-		const isAdmin = user.roles.includes("admin");
+		const isAdmin = user.roles.includes("ADMIN");
 
 		if (!isAdmin && user.id !== ownerId) {
 			return sendForbiddenError(res);
